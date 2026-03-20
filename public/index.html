@@ -13,11 +13,18 @@
 
     <nav>
         <button onclick="showSection('users')" class="active">Users</button>
+        <button onclick="showSection('add-users')">+ Ajouter User</button>
         <button onclick="showSection('profils')">Profils</button>
+        <button onclick="showSection('add-profils')">+ Ajouter Profil</button>
+        <button onclick="showSection('add-clients')">+ Ajouter Client</button>
         <button onclick="showSection('clients')">Clients</button>
+        <button onclick="showSection('add-chargeurs')">+ Ajouter Chargeur</button>
         <button onclick="showSection('chargeurs')">Chargeurs</button>
+        <button onclick="showSection('add-destinations')">+ Ajouter Destination</button>
         <button onclick="showSection('destinations')">Destinations</button>
+        <button onclick="showSection('add-consignes')">+ Ajouter Consigne</button>
         <button onclick="showSection('consignes')">Consignes</button>
+        <button onclick="showSection('add-wagons')">+ Ajouter Wagon</button>
         <button onclick="showSection('wagons')">Wagons</button>
         <button onclick="showSection('pesees')">Pesees</button>
         <button onclick="showSection('add-pesee')">+ Ajouter Pesee</button>
@@ -30,11 +37,43 @@
         </div>
     </section>
 
+    <section id="add-users">
+        <h2>Ajouter User</h2>
+        <form id="addUserForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>nom</label>
+                    <input type="text" id="userNom" name="nom" placeholder="nom" required>
+                </div>
+                <div class="form-group">
+                    <label>password</label>
+                    <input type="password" id="userPassword" name="password" placeholder="password" required>
+                </div>
+            </div>
+            <button type="submit">Créer User</button>
+        </form>
+        <div id="userFormStatus"></div>
+    </section>
+
     <section id="profils">
         <h2>Profils</h2>
         <div id="profils-table-container">
             <p class="loading">Chargement...</p>
         </div>
+    </section>
+
+    <section id="add-profils">
+        <h2>Ajouter Profil</h2>
+        <form id="addProfilForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>designation</label>
+                    <input type="text" id="profilDesignation" name="designation" placeholder="designation" required>
+                </div>
+            </div>
+            <button type="submit">Créer Profil</button>
+        </form>
+        <div id="profilFormStatus"></div>
     </section>
 
     <section id="clients">
@@ -44,11 +83,39 @@
         </div>
     </section>
 
+    <section id="add-clients">
+        <h2>Ajouter Client</h2>
+        <form id="addClientForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>designation</label>
+                    <input type="text" id="clientDesignation" name="designation" placeholder="designation" required>
+                </div>
+            </div>
+            <button type="submit">Créer Client</button>
+        </form>
+        <div id="clientFormStatus"></div>
+    </section>
+
     <section id="chargeurs">
         <h2>Chargeurs</h2>
         <div id="chargeurs-table-container">
             <p class="loading">Chargement...</p>
         </div>
+    </section>
+
+    <section id="add-chargeurs">
+        <h2>Ajouter Chargeur</h2>
+        <form id="addChargeurForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>designation</label>
+                    <input type="text" id="chargeurDesignation" name="designation" placeholder="designation" required>
+                </div>
+            </div>
+            <button type="submit">Créer Chargeur</button>
+        </form>
+        <div id="chargeurFormStatus"></div>
     </section>
 
     <section id="destinations">
@@ -58,6 +125,20 @@
         </div>
     </section>
 
+    <section id="add-destinations">
+        <h2>Ajouter Destination</h2>
+        <form id="addDestinationForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>designation</label>
+                    <input type="text" id="destinationDesignation" name="designation" placeholder="designation" required>
+                </div>
+            </div>
+            <button type="submit">Créer Destination</button>
+        </form>
+        <div id="destinationFormStatus"></div>
+    </section>
+
     <section id="consignes">
         <h2>Consignes</h2>
         <div id="consignes-table-container">
@@ -65,11 +146,43 @@
         </div>
     </section>
 
+    <section id="add-consignes">
+        <h2>Ajouter Consigne</h2>
+        <form id="addConsigneForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>designation</label>
+                    <input type="text" id="consigneDesignation" name="designation" placeholder="designation" required>
+                </div>
+            </div>
+            <button type="submit">Créer Consigne</button>
+        </form>
+        <div id="consigneFormStatus"></div>
+    </section>
+
     <section id="wagons">
         <h2>Wagons</h2>
         <div id="wagons-table-container">
             <p class="loading">Chargement...</p>
         </div>
+    </section>
+
+    <section id="add-wagons">
+        <h2>Ajouter Wagon</h2>
+        <form id="addWagonForm">
+            <div class="form-row">
+                <!-- <div class="form-group">
+                    <label>noTag</label>
+                    <input type="number" id="wagonNoTag" placeholder="noTag" required>
+                </div> -->
+                <div class="form-group">
+                    <label>tare</label>
+                    <input type="number" id="wagonTare" name="tare" placeholder="tare" min="0" required>
+                </div>
+            </div>
+            <button type="submit">Créer Wagon</button>
+        </form>
+        <div id="wagonFormStatus"></div>
     </section>
 
     <section id="pesees">
@@ -118,8 +231,17 @@
             event.target.classList.add('active');
             if (sectionId === 'add-pesee') {
                 addItemRow();
+            } else if (sectionId.startsWith('add-')) {
+                // Clear status for add sections
+                const statusId = sectionId.replace('add-', '') + 'FormStatus';
+                const status = document.getElementById(statusId);
+                if (status) status.innerHTML = '';
             } else {
                 loadTable(sectionId);
+                if (sectionId === 'pesees') {
+                    const div = document.getElementById('train-group')
+                    Promise.all([loadSelectOptions(div.querySelector('.item-train'), 'train')])
+                }
             }
         }
 
@@ -263,9 +385,34 @@
             ]);
         }
 
-        //document.addEventListener('submit', async (e) => {
-            
-        //}); -->
+        async function handleAddForm(e, form, path, statusId, listSectionId) {
+            e.preventDefault();
+            const status = document.getElementById(statusId);
+            try {
+                
+                const formData = new FormData(form);
+                
+                
+                const payload = Object.fromEntries(formData);
+                
+                const res = await fetch(`${API_BASE}/${path}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    status.innerHTML = '<p class="success">Élément créé avec succès!</p>';
+                    form.reset();
+                    // Optionally switch to list
+                    // showSection(listSectionId);
+                } else {
+                    const err = await res.json();
+                    status.innerHTML = `<p class="error">Erreur: ${err.message || 'Serveur'}</p>`;
+                }
+            } catch (err) {
+                status.innerHTML = `<p class="error">Réseau: ${err.message}</p>`;
+            }
+        }
 
         document.addEventListener('submit', async (e) => {
             if (e.target.id === 'get-pesee-train') {
@@ -323,8 +470,74 @@
                 } catch (err) {
                     status.innerHTML = `<p class="error">Réseau: ${err.message}</p>`;
                 }
-            }
+            } 
+            
+            if (e.target.id.startsWith('add')) {
+                const form = e.target;
+                const pathMap = {
+                    'addUserForm': 'user',
+                    'addProfilForm': 'profil',
+                    'addClientForm': 'client',
+                    'addChargeurForm': 'chargeur',
+                    'addDestinationForm': 'destination',
+                    'addWagonForm': 'wagon'
+                };
+                const path = pathMap[form.id];
+                if (!path) return;
+                const baseSection = path;
+                const statusId = path + 'FormStatus';
+                const listSectionId = path === 'user' ? 'users' : path === 'wagon' ? 'wagons' : path + 's';
+                handleAddForm(e, form, path, statusId, listSectionId);
+            } /*else if (e.target.id === 'peseeForm') {
+                const status = document.getElementById('formStatus');
+                const train = document.getElementById('trainInput').value.trim();
+                const nb_locomotive = parseInt(document.getElementById('nbLocomotive').value);
+                
+                if (!train || isNaN(nb_locomotive)) {
+                    return status.innerHTML = '<p class="error">Train et nb_locomotive requis</p>';
+                }
 
+                const item = Array.from(document.querySelectorAll('.item-row')).map(row => {
+                    const destination = parseInt(row.querySelector('.item-destination').value);
+                    const client = parseInt(row.querySelector('.item-client').value);
+                    const chargeur = parseInt(row.querySelector('.item-chargeur').value);
+                    const wagon = parseInt(row.querySelector('.item-wagon').value);
+                    const proidBrute = parseInt(row.querySelector('.item-proidBrute').value);
+                    const consigne = row.querySelector('.item-consigne').value.trim() || 'Standard';
+                    
+                    if (destination && client && chargeur && wagon && proidBrute) {
+                        return { destination, client, chargeur, wagon, proidBrute, consigne };
+                    }
+                }).filter(Boolean);
+
+                if (item.length === 0) {
+                    return status.innerHTML = '<p class="error">Remplissez au moins 1 pesee de wagon valide</p>';
+                }
+
+                const payload = { train, nb_locomotive, item };
+
+                try {
+                    const res = await fetch(`${API_BASE}/pesee`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        status.innerHTML = '<p class="success">Pesées créées avec succès! Total poids calculé côté serveur.</p>';
+                        document.getElementById('peseeForm').reset();
+                        document.getElementById('itemContainer').innerHTML = '';
+                        itemCounter = 0;
+                        //showSection('pesees');
+                    } else {
+                        const err = await res.json();
+                        status.innerHTML = `<p class="error">Erreur: ${err.message || err.error || 'Serveur'}</p>`;
+                    }
+                } catch (err) {
+                    status.innerHTML = `<p class="error">Réseau: ${err.message}</p>`;
+                }
+            }
+            */
         })
 
         window.onload = async () => {loadTable('users'); const div = document.getElementById('train-group') ;  await loadSelectOptions(div.querySelector('.item-train'), 'train')};

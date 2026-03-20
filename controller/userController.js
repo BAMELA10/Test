@@ -6,7 +6,7 @@ const User = require('../model/user')
 // creation d'un utilisateur
 const create = async(req, res) => {
     const { nom, password, profil } = req.body;
-    if (!nom || password || profil) throw new Error("Invalid data");
+    if (!nom || !password) throw new Error("Invalid data");
 
     const profile = await Profil.findOne({ where: { code: profil } })
     if (!profil) throw new Error("Invalid Profile please check")
