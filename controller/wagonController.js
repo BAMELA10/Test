@@ -4,8 +4,9 @@ const express = require('express')
 
 const create = async(req, res) => {
     const data = req.body;
+    const tare = parseInt(data.tare)
     if (!data) throw new Error("Invalid data");
-    const saved = await Wagon.create({ tare: data.designation })
+    const saved = await Wagon.create({ tare: tare })
     return res.json({ data: saved })
 }
 
