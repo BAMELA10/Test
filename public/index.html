@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Gestion Pesee</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <h1>Dashboard Gestion Pesee</h1>
+
+    <nav>
+        <button onclick="showSection('users')" class="active">Users</button>
+        <button onclick="showSection('profils')">Profils</button>
+        <button onclick="showSection('clients')">Clients</button>
+        <button onclick="showSection('chargeurs')">Chargeurs</button>
+        <button onclick="showSection('destinations')">Destinations</button>
+        <button onclick="showSection('consignes')">Consignes</button>
+        <button onclick="showSection('wagons')">Wagons</button>
+        <button onclick="showSection('pesees')">Pesees</button>
+        <button onclick="showSection('add-pesee')">+ Ajouter Pesee</button>
+    </nav>
+
+    <section id="users" class="active">
+        <h2>Users</h2>
+        <div id="users-table-container">
+            <p class="loading">Chargement...</p>
+        </div>
+    </section>
+
+    <section id="profils">
+        <h2>Profils</h2>
+        <div id="profils-table-container">
+            <p class="loading">Chargement...</p>
+        </div>
+    </section>
+
+    <section id="clients">
+        <h2>Clients</h2>
+        <div id="clients-table-container">
+            <p class="loading">Chargement...</p>
+        </div>
+    </section>
+
+    <section id="chargeurs">
+        <h2>Chargeurs</h2>
+        <div id="chargeurs-table-container">
+            <p class="loading">Chargement...</p>
+        </div>
+    </section>
+
+    <section id="destinations">
+        <h2>Destinations</h2>
+        <div id="destinations-table-container">
+            <p class="loading">Chargement...</p>
+        </div>
+    </section>
+
+    <section id="consignes">
+        <h2>Consignes</h2>
+        <div id="consignes-table-container">
+            <p class="loading">Chargement...</p>
+        </div>
+    </section>
+
+    <section id="wagons">
+        <h2>Wagons</h2>
+        <div id="wagons-table-container">
+            <p class="loading">Chargement...</p>
+        </div>
+    </section>
+
+    <section id="pesees">
+        <h2>Pesees</h2>
+        <div id="pesees-table-container">
+            <form id="get-pesee-train">
+                <div class="form-group" id="train-group">
+                    <label for="item-train">train </label>
+                    <select name="item-train" class="item-train"></select>
+                </div>
+                <button type="submit" style="margin-top:5%">Recupérer le rail Ticket</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="add-pesee">
+        <h2>Ajouter Pesée</h2>
+        <form id="peseeForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>train</label>
+                    <input type="text" id="trainInput" placeholder="T001" required>
+                </div>
+                <div class="form-group">
+                    <label>nb_locomotive:</label>
+                    <input type="number" id="nbLocomotive" placeholder="2" min="1" required>
+                </div>
+            </div>
+            <div class="wagons-section">
+                <h3>Pesée par Wagon <button type="button" onclick="addItemRow()">+ Wagon</button></h3>
+                <div id="itemContainer"></div>
+            </div>
+            <button type="submit">Créer Pesée</button>
+        </form>
+        <div id="formStatus"></div>
+    </section>
+
+    <script>
+        const API_BASE = '/api';
+        let itemCounter = 0;
+
+        function showSection(sectionId) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+            if (sectionId === 'add-pesee') {
+                addItemRow();
+            } else {
+                loadTable(sectionId);
+            }
+        }
+
+        async function loadTable(sectionId) {
+            const containerId = sectionId + '-table-container';
+            const container = document.getElementById(containerId);
+            const paths = {
+                users: 'user',
+                profils: 'profil',
+                clients: 'client',
+                chargeurs: 'chargeur',
+                destinations: 'destination',
+                consignes: 'consigne',
+                wagons: 'wagon',
+                pesees: 'pesee'
+            };
+
+            const path = paths[sectionId];
+            if (!path || !container) return;
+            if (path === "pesee") return;
+            try {
+                const res = await fetch(`${API_BASE}/${path}`);
+                const {
+                    data = [],
+                } = await res.json();
+
+                if (!data.length) return container.innerHTML = '<p>Aucune donnée.</p>';
+                const headers = Object.keys(data[0]);
+                const table = `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${data.map(row => `<tr>${headers.map(h => `<td>${row[h] || ''}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+                container.innerHTML = table;
+            } catch(e) {
+                container.innerHTML = `<p class="error">Erreur: ${e.message}</p>`;
+            }
+        }
+
+        async function loadPenseeTrainTable(train) {
+            const containerId = 'pesees-table-container';
+            const container = document.getElementById(containerId);
+            try {
+                const res = await fetch(`${API_BASE}/pesee/${train}`);
+                const {data = [], totalWeight} = await res.json();
+                if (!data.length) return container.innerHTML += '<p>Aucune donnée.</p>';
+                const table = 
+                `
+                <span><h1>No Interne du train: ${train} </h1> </span>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Wagon</th>
+                            <th>NoTag</th>
+                            <th>Chargeur</th>
+                            <th>Destination</th>
+                            <th>Client</th>
+                            <th>Tare</th>
+                            <th>Brut</th>
+                            <th>Net</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map((row, index) => 
+                        `
+                        <tr>
+                            <td>Wagon ${index + 1}</td>
+                            <td>${row.Wagon.noTag}</td>
+                            <td>${row.Chargeur.designation}</td>
+                            <td>${row.Destination.designation}</td>
+                            <td>${row.Client.designation}</td>
+                            <td>${row.Wagon.tare}</td>
+                            <td>${row.poidBrute}</td>
+                            <td>${row.poidNet}</td>
+                        </tr>
+                        
+                        `).join('')
+                        }
+                        <tr>
+                            <td style="background-color:red">Total poid Net</td>
+                            <td>${totalWeight}</td>
+                        </tr>
+                    </tbody>
+                </table>`;
+                container.innerHTML += table ;
+            } catch(e) {
+                container.innerHTML = `<p class="error">Erreur: ${e.message}</p>`;
+            }
+        }
+        async function loadSelectOptions(select, endpoint) {
+            try {
+                const res = await fetch(`${API_BASE}/${endpoint}`);
+                const {data} = await res.json();
+                select.innerHTML = '<option value="">Sélectionner...</option>' + data.map(item => {
+                    if (endpoint === 'wagon') return `<option value="${item.noTag}">${item.noTag} (tare: ${item.tare})</option>`;
+                    if (endpoint === 'train') return `<option value="${item.no_interne}">${item.nom_interne}</option>`
+                    return `<option value="${item.code}">${item.code}: ${item.designation}</option>`;
+                }).join('');
+            } catch(e) {
+                select.innerHTML = '<option>Erreur chargement</option>';
+            }
+        }
+
+        function addItemRow() {
+            itemCounter++;
+            const container = document.getElementById('itemContainer');
+            const div = document.createElement('div');
+            div.className = 'item-row';
+            div.innerHTML = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>destination </label>
+                        <select class="item-destination" data-item="${itemCounter}"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>client </label>
+                        <select class="item-client" data-item="${itemCounter}"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>chargeur</label>
+                        <select class="item-chargeur" data-item="${itemCounter}"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>wagon (noTag):</label>
+                        <select class="item-wagon" data-item="${itemCounter}"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>proidBrute:</label>
+                        <input type="number" class="item-proidBrute" data-item="${itemCounter}" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>consigne</label>
+                        <input type="text" class="item-consigne" data-item="${itemCounter}" placeholder="Standard">
+                    </div>
+                    <button type="button" class="remove-btn" onclick="this.closest('.item-row').remove()">X</button>
+                </div>
+            `;
+            container.appendChild(div);
+            // Load selects for this row
+            Promise.all([
+                loadSelectOptions(div.querySelector('.item-destination'), 'destination'),
+                loadSelectOptions(div.querySelector('.item-client'), 'client'),
+                loadSelectOptions(div.querySelector('.item-chargeur'), 'chargeur'),
+                loadSelectOptions(div.querySelector('.item-wagon'), 'wagon')
+            ]);
+        }
+
+        //document.addEventListener('submit', async (e) => {
+            
+        //}); -->
+
+        document.addEventListener('submit', async (e) => {
+            if (e.target.id === 'get-pesee-train') {
+                e.preventDefault();
+                const find = parseInt(document.querySelector('.item-train').value);
+                await loadPenseeTrainTable(find);
+            }
+
+            if(e.target.id === 'peseeForm') {
+                e.preventDefault();
+                const status = document.getElementById('formStatus');
+                const train = document.getElementById('trainInput').value.trim();
+                const nb_locomotive = parseInt(document.getElementById('nbLocomotive').value);
+                
+                if (!train || isNaN(nb_locomotive)) {
+                    return status.innerHTML = '<p class="error">Train et nb_locomotive requis</p>';
+                }
+
+                const item = Array.from(document.querySelectorAll('.item-row')).map(row => {
+                    const destination = parseInt(row.querySelector('.item-destination').value);
+                    const client = parseInt(row.querySelector('.item-client').value);
+                    const chargeur = parseInt(row.querySelector('.item-chargeur').value);
+                    const wagon = parseInt(row.querySelector('.item-wagon').value);
+                    const proidBrute = parseInt(row.querySelector('.item-proidBrute').value);
+                    const consigne = row.querySelector('.item-consigne').value.trim() || 'Standard';
+                    
+                    if (destination && client && chargeur && wagon && proidBrute) {
+                        return { destination, client, chargeur, wagon, proidBrute, consigne };
+                    }
+                }).filter(Boolean);
+
+                if (item.length === 0) {
+                    return status.innerHTML = '<p class="error">Remplissez au moins 1 pesee de wagon valide</p>';
+                }
+
+                const payload = { train, nb_locomotive, item };
+
+                try {
+                    const res = await fetch(`${API_BASE}/pesee`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        status.innerHTML = '<p class="success">Pesées créées avec succès! Total poids calculé côté serveur.</p>';
+                        document.getElementById('peseeForm').reset();
+                        document.getElementById('itemContainer').innerHTML = '';
+                        itemCounter = 0;
+                        //showSection('pesees');
+                    } else {
+                        const err = await res.json();
+                        status.innerHTML = `<p class="error">Erreur: ${err.message || err.error || 'Serveur'}</p>`;
+                    }
+                } catch (err) {
+                    status.innerHTML = `<p class="error">Réseau: ${err.message}</p>`;
+                }
+            }
+
+        })
+
+        window.onload = async () => {loadTable('users'); const div = document.getElementById('train-group') ;  await loadSelectOptions(div.querySelector('.item-train'), 'train')};
+    </script>
+</body>
+
+</html>
